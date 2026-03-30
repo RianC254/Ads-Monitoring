@@ -63,6 +63,71 @@ body::after {
 .glow-orb-1 { width: 500px; height: 500px; background: rgba(201,168,76,.04); top: -100px; left: 100px; }
 .glow-orb-2 { width: 400px; height: 400px; background: rgba(91,141,245,.04); bottom: 0; right: 100px; }
 
+/* ── TOP NAV ── */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 24px;
+  background: rgba(17, 18, 26, 0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.top-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.top-nav-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+
+.top-nav-brand em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.top-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.top-nav-link {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text2);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.top-nav-link:hover {
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+}
+
+.top-nav-link.active {
+  color: var(--gold2);
+  background: var(--gold-dim);
+  border-color: rgba(201,168,76,.2);
+}
+
 /* ── LAYOUT ── */
 .app {
   display: grid;
@@ -77,7 +142,7 @@ body::after {
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
   padding: 32px 20px 28px;
-  position: sticky; top: 0; height: 100vh;
+  position: sticky; top: 73px; height: calc(100vh - 73px);
   overflow-y: auto;
 }
 
@@ -408,8 +473,32 @@ body::after {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 960px) {
+  .top-nav {
+    padding: 14px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .top-nav-links {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .top-nav-link {
+    white-space: nowrap;
+  }
+
   .app { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 16px 20px; gap: 6px; }
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 16px 20px;
+    gap: 6px;
+  }
   .brand, .nav-section-label, .health-card { display: none; }
   .nav-item { padding: 8px 12px; font-size: 12px; }
   .main { padding: 24px 20px; }
@@ -420,6 +509,21 @@ body::after {
 </style>
 </head>
 <body>
+
+<nav class="top-nav">
+  <div class="top-nav-left">
+    <div class="top-nav-brand">RC <em>ADS</em></div>
+  </div>
+
+  <div class="top-nav-links">
+    <button class="top-nav-link active" onclick="switchTab('input', this)">Input</button>
+    <button class="top-nav-link" onclick="switchTab('analysis', this)">Analysis</button>
+    <button class="top-nav-link" onclick="switchTab('recs', this)">Recommendations</button>
+    <button class="top-nav-link" onclick="switchTab('benchmarks', this)">Benchmarks</button>
+    <button class="top-nav-link" onclick="switchTab('history', this)">History</button>
+  </div>
+</nav>
+
 <div class="glow-orb glow-orb-1"></div>
 <div class="glow-orb glow-orb-2"></div>
 
@@ -623,11 +727,53 @@ const LEADTYPE_CVR = { instant:[8,18], landing:[2,6], messenger:[10,22], call:[4
 function switchTab(name, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.top-nav-link').forEach(n => n.classList.remove('active'));
+
   document.getElementById('panel-' + name).classList.add('active');
-  if (el) el.classList.add('active');
-  const T = { input:'Input Campaign Data', analysis:'Performance Analysis', recs:'Recommendations', benchmarks:'Benchmark Comparison', history:'Campaign History' };
-  const S = { input:'Enter your Meta Ads figures to receive a full performance analysis', analysis:'A breakdown of your key lead gen metrics and campaign health', recs:'Prioritised actions to improve your CPL, CTR, and lead volume', benchmarks:'How your metrics compare against industry averages', history:'Track performance trends across all analysed campaigns' };
-  const I = { input:'Input Campaign Data', analysis:'Performance Analysis', recs:'Recommendations', benchmarks:'Benchmark Comparison', history:'Campaign History' };
+
+  const sidebarMap = {
+    input: 0,
+    analysis: 1,
+    recs: 2,
+    benchmarks: 3,
+    history: 4
+  };
+
+  const topMap = {
+    input: 0,
+    analysis: 1,
+    recs: 2,
+    benchmarks: 3,
+    history: 4
+  };
+
+  const sidebarItems = document.querySelectorAll('.nav-item');
+  const topItems = document.querySelectorAll('.top-nav-link');
+
+  if (sidebarItems[sidebarMap[name]]) {
+    sidebarItems[sidebarMap[name]].classList.add('active');
+  }
+
+  if (topItems[topMap[name]]) {
+    topItems[topMap[name]].classList.add('active');
+  }
+
+  const T = {
+    input:'Input Campaign Data',
+    analysis:'Performance Analysis',
+    recs:'Recommendations',
+    benchmarks:'Benchmark Comparison',
+    history:'Campaign History'
+  };
+
+  const S = {
+    input:'Enter your Meta Ads figures to receive a full performance analysis',
+    analysis:'A breakdown of your key lead gen metrics and campaign health',
+    recs:'Prioritised actions to improve your CPL, CTR, and lead volume',
+    benchmarks:'How your metrics compare against industry averages',
+    history:'Track performance trends across all analysed campaigns'
+  };
+
   document.getElementById('pg-title').innerHTML = T[name].replace(/(\w+)\s(.+)/, '$1 <em>$2</em>');
   document.getElementById('pg-sub').textContent = S[name];
 }
@@ -796,7 +942,6 @@ function runAnalysis() {
   const cvrStatus = m.cvr>=cvrBm[0]?'g':m.cvr>=cvrBm[0]*.5?'a':'r';
   const lpdStatus = m.lpd<8?'g':m.lpd<15?'a':'r';
 
-  // Analysis HTML
   const analysisHTML = `
     <div class="score-banner">
       ${ringSVG(sv)}
@@ -838,7 +983,6 @@ function runAnalysis() {
     </div>`:''}
   `;
 
-  // Benchmark HTML
   function bmRow(name, your, lo, hi, unit, pfx) {
     if (!your) return '';
     const pct = Math.min(100, your/(hi*1.6)*100);
@@ -874,7 +1018,6 @@ function runAnalysis() {
     </div>
   `;
 
-  // Recs HTML
   const lvlOrder = ['critical','warning','positive','info'];
   recs.sort((a,b)=>lvlOrder.indexOf(a.lvl)-lvlOrder.indexOf(b.lvl));
   const urgentCount = recs.filter(r=>r.lvl==='critical').length;
@@ -904,7 +1047,6 @@ function runAnalysis() {
   });
   recsHTML += '</div>';
 
-  // Update DOM
   document.getElementById('analysis-body').innerHTML = analysisHTML;
   document.getElementById('recs-body').innerHTML = recsHTML;
   document.getElementById('bm-body').innerHTML = bmHTML;
@@ -922,19 +1064,12 @@ function runAnalysis() {
   metaDot.style.background = sv>=72?'var(--green)':sv>=48?'var(--amber)':'var(--red)';
   document.getElementById('pg-meta-text').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IE', {hour:'2-digit',minute:'2-digit'});
 
-  // Save history
   const hist = JSON.parse(localStorage.getItem('metaiq3_hist')||'[]');
   hist.unshift({ name:d.name, date:new Date().toLocaleDateString('en-IE'), spend:'€'+d.spend.toLocaleString(), cpl:d.leads?'€'+m.cpl.toFixed(2):'—', ctr:m.ctr.toFixed(2)+'%', cpm:'€'+m.cpm.toFixed(2), leads:d.leads||0, score:sv });
   localStorage.setItem('metaiq3_hist', JSON.stringify(hist.slice(0,25)));
   renderHistory();
 
-  // Navigate
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('panel-analysis').classList.add('active');
-  document.querySelectorAll('.nav-item')[1].classList.add('active');
-  document.getElementById('pg-title').innerHTML = 'Performance <em>Analysis</em>';
-  document.getElementById('pg-sub').textContent = 'A breakdown of your key lead gen metrics and campaign health';
+  switchTab('analysis');
 }
 
 function renderHistory() {
